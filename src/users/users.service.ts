@@ -5,7 +5,6 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserRO } from './dto/create-user.ro';
 
 @Injectable()
 export class UsersService {
@@ -36,7 +35,7 @@ export class UsersService {
     });
   }
 
-  async createUser(data: Prisma.UserCreateInput): Promise<CreateUserRO> {
+  async createUser(data: Prisma.UserCreateInput): Promise<UserModel> {
     const { username, name, password, birthDate } = data;
     const hashPass = await bcrypt.hash(password, 10);
     return this.prisma.user.create({
@@ -82,6 +81,8 @@ export class UsersService {
     const loginUser = await this.prisma.user.findUnique({
       where: { username: payload.username },
     });
+    console.log({ loginUser }, !loginUser.name);
+
     const errors = { User: 'username or password wrong' };
 
     if (!loginUser) {
@@ -89,8 +90,8 @@ export class UsersService {
     }
 
     const authenticated = await bcrypt.compare(
-      loginUser.password,
       payload.password,
+      loginUser.password,
     );
 
     if (!authenticated) {

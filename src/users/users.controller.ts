@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User as UserModel } from '@prisma/client';
+import * as jwt from 'jsonwebtoken';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateUserRO } from './dto/create-user.ro';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UsersService } from './users.service';
@@ -22,7 +24,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('/sign-up')
-  async create(@Body() createUserData: CreateUserDto): Promise<CreateUserRO> {
+  async create(@Body() createUserData: CreateUserDto): Promise<UserModel> {
     return this.usersService.createUser(createUserData);
   }
 
@@ -36,9 +38,17 @@ export class UsersController {
     return this.usersService.findUsers({});
   }
 
+  @Get('/me')
+  async findMe(@Req() request: Request) {
+    const { headers } = request;
+    const token = headers.authorization.split(' ')[1];
+    const decoded: any = jwt.verify(token, process.env.SECRET);
+    return await this.usersService.findUser({ id: decoded.id });
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<UserModel> {
-    return this.usersService.findUser({ id: Number(id) });
+  async findOne(@Param('id') id: string): Promise<UserModel> {
+    return await this.usersService.findUser({ id: Number(id) });
   }
 
   @Patch(':id')

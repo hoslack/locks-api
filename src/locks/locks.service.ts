@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class LockService {
   constructor(private prisma: PrismaService) {}
 
-  async lock(
+  async findLock(
     lockWhereUniqueInput: Prisma.LockWhereUniqueInput,
   ): Promise<Lock | null> {
     return this.prisma.lock.findUnique({
@@ -14,7 +14,7 @@ export class LockService {
     });
   }
 
-  async locks(params: {
+  async findLocks(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.LockWhereUniqueInput;
