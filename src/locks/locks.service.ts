@@ -1,26 +1,56 @@
 import { Injectable } from '@nestjs/common';
-import { CreateLockDto } from './dto/create-lock.dto';
-import { UpdateLockDto } from './dto/update-lock.dto';
+import { Lock, Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class LocksService {
-  create(createLockDto: CreateLockDto) {
-    return 'This action adds a new lock';
+export class LockService {
+  constructor(private prisma: PrismaService) {}
+
+  async lock(
+    lockWhereUniqueInput: Prisma.LockWhereUniqueInput,
+  ): Promise<Lock | null> {
+    return this.prisma.lock.findUnique({
+      where: lockWhereUniqueInput,
+    });
   }
 
-  findAll() {
-    return `This action returns all locks`;
+  async locks(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.LockWhereUniqueInput;
+    where?: Prisma.LockWhereInput;
+    orderBy?: Prisma.LockOrderByWithRelationInput;
+  }): Promise<Lock[]> {
+    const { skip, take, cursor, where, orderBy } = params;
+    return this.prisma.lock.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} lock`;
+  async createLock(data: Prisma.LockCreateInput): Promise<Lock> {
+    return this.prisma.lock.create({
+      data,
+    });
   }
 
-  update(id: number, updateLockDto: UpdateLockDto) {
-    return `This action updates a #${id} lock`;
+  async updateLock(params: {
+    where: Prisma.LockWhereUniqueInput;
+    data: Prisma.LockUpdateInput;
+  }): Promise<Lock> {
+    const { data, where } = params;
+    return this.prisma.lock.update({
+      data,
+      where,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} lock`;
+  async deleteLock(where: Prisma.LockWhereUniqueInput): Promise<Lock> {
+    return this.prisma.lock.delete({
+      where,
+    });
   }
 }
