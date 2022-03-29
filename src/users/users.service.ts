@@ -82,8 +82,6 @@ export class UsersService {
     const loginUser = await this.prisma.user.findUnique({
       where: { username: payload.username },
     });
-    console.log('USER BOOLEAN:', { loginUser });
-
     const errors = { User: 'username or password wrong' };
 
     if (!loginUser) {
