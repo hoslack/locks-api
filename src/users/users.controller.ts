@@ -16,6 +16,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UsersService } from './users.service';
+import { UseReturnObject } from './user.interface';
 
 @ApiBearerAuth()
 @ApiTags('users')
@@ -24,7 +25,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('/sign-up')
-  async create(@Body() createUserData: CreateUserDto): Promise<UserModel> {
+  async create(
+    @Body() createUserData: CreateUserDto,
+  ): Promise<UseReturnObject> {
     return this.usersService.createUser(createUserData);
   }
 
@@ -34,7 +37,7 @@ export class UsersController {
   }
 
   @Get()
-  findAll(): Promise<UserModel[]> {
+  findAll(): Promise<UseReturnObject[]> {
     return this.usersService.findUsers({});
   }
 
@@ -47,7 +50,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<UserModel> {
+  async findOne(@Param('id') id: string): Promise<UseReturnObject> {
     return await this.usersService.findUser({ id: Number(id) });
   }
 
@@ -55,7 +58,7 @@ export class UsersController {
   async update(
     @Param('id') id: string,
     @Body() updateUserData: UpdateUserDto,
-  ): Promise<UserModel> {
+  ): Promise<UseReturnObject> {
     return this.usersService.updateUser({
       where: { id: Number(id) },
       data: updateUserData,
@@ -63,7 +66,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<UserModel> {
+  remove(@Param('id') id: string): Promise<UseReturnObject> {
     return this.usersService.deleteUser({ id: Number(id) });
   }
 }

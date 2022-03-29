@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UseReturnObject } from './user.interface';
 
 @Injectable()
 export class UsersService {
@@ -12,9 +13,15 @@ export class UsersService {
 
   async findUser(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<UserModel | null> {
+  ): Promise<UseReturnObject | null> {
     return this.prisma.user.findUnique({
       where: userWhereUniqueInput,
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        birthDate: true,
+      },
     });
   }
 
@@ -24,7 +31,7 @@ export class UsersService {
     cursor?: Prisma.UserWhereUniqueInput;
     where?: Prisma.UserWhereInput;
     orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<UserModel[]> {
+  }): Promise<UseReturnObject[]> {
     const { skip, take, cursor, where, orderBy } = params;
     return this.prisma.user.findMany({
       skip,
@@ -32,33 +39,59 @@ export class UsersService {
       cursor,
       where,
       orderBy,
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        birthDate: true,
+      },
     });
   }
 
-  async createUser(data: Prisma.UserCreateInput): Promise<UserModel> {
+  async createUser(data: Prisma.UserCreateInput): Promise<UseReturnObject> {
     const { username, name, password, birthDate } = data;
     const hashPass = await bcrypt.hash(password, 10);
     return this.prisma.user.create({
       data: { username, name, birthDate, password: hashPass },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        birthDate: true,
+      },
     });
   }
 
   async updateUser(params: {
     where: Prisma.UserWhereUniqueInput;
     data: UpdateUserDto;
-  }): Promise<UserModel> {
+  }): Promise<UseReturnObject> {
     const { where, data } = params;
     const { username, name, password, birthDate } = data;
     const hashPass = await bcrypt.hash(password, 10);
     return this.prisma.user.update({
       data: { username, name, password: hashPass, birthDate },
       where,
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        birthDate: true,
+      },
     });
   }
 
-  async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<UserModel> {
+  async deleteUser(
+    where: Prisma.UserWhereUniqueInput,
+  ): Promise<UseReturnObject> {
     return this.prisma.user.delete({
       where,
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        birthDate: true,
+      },
     });
   }
 
@@ -81,7 +114,6 @@ export class UsersService {
     const loginUser = await this.prisma.user.findUnique({
       where: { username: payload.username },
     });
-    console.log({ loginUser }, !loginUser.name);
 
     const errors = { User: 'username or password wrong' };
 
